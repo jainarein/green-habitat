@@ -1,9 +1,7 @@
-# 🌿 Green Habitat Certification API
+# 🌿 Green Habitat Certification
 
 > AI-powered environmental livability certification for any residential area in India.
 > One location input → real-time data → Peace Index Score → Satellite View.
-
-Built for **AMD Slingshot Hackathon** 🏆
 
 ---
 
