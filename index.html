@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Green Habitat — Environmental Certification</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060d08;
+    --surface: #0d1a0f;
+    --card: #111f13;
+    --border: #1e3322;
+    --green-1: #00ff87;
+    --green-2: #00c96a;
+    --green-3: #2d7a4f;
+    --gold: #ffd700;
+    --orange: #ff8c42;
+    --red: #ff4757;
+    --text: #e8f5ec;
+    --muted: #6b9478;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,255,135,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,135,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .logo-icon {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, var(--green-1), var(--green-2));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+  }
+
+  .logo-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--green-1);
+    letter-spacing: -0.5px;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, #fff 40%, var(--green-1));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .tagline {
+    color: var(--muted);
+    font-size: 16px;
+    font-weight: 300;
+    font-style: italic;
+  }
+
+  /* Search */
+  .search-box {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 40px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 8px 8px 8px 20px;
+    transition: border-color 0.2s;
+  }
+
+  .search-box:focus-within {
+    border-color: var(--green-3);
+    box-shadow: 0 0 0 3px rgba(0,255,135,0.08);
+  }
+
+  .search-box input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+  }
+
+  .search-box input::placeholder { color: var(--muted); }
+
+  .search-btn {
+    background: linear-gradient(135deg, var(--green-2), var(--green-3));
+    border: none;
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 12px 24px;
+    border-radius: 10px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: opacity 0.2s, transform 0.1s;
+    white-space: nowrap;
+  }
+
+  .search-btn:hover { opacity: 0.9; }
+  .search-btn:active { transform: scale(0.98); }
+
+  /* Loading */
+  .loading {
+    display: none;
+    text-align: center;
+    padding: 60px 0;
+  }
+
+  .spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid var(--border);
+    border-top-color: var(--green-1);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading p {
+    color: var(--muted);
+    font-style: italic;
+    font-size: 15px;
+  }
+
+  /* Error */
+  .error-box {
+    display: none;
+    background: rgba(255,71,87,0.1);
+    border: 1px solid rgba(255,71,87,0.3);
+    border-radius: 12px;
+    padding: 16px 20px;
+    color: #ff6b7a;
+    margin-bottom: 24px;
+    font-size: 15px;
+  }
+
+  /* Results */
+  .results { display: none; }
+
+  /* Score Hero */
+  .score-hero {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: center;
+  }
+
+  .location-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .coordinates {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 16px;
+    font-family: monospace;
+  }
+
+  .certification-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .badge-platinum { background: linear-gradient(135deg, #ffd700, #ffa500); color: #1a1a00; }
+  .badge-green { background: linear-gradient(135deg, #00ff87, #00c96a); color: #001a0a; }
+  .badge-moderate { background: rgba(255,140,66,0.2); color: #ff8c42; border: 1px solid rgba(255,140,66,0.4); }
+  .badge-urban { background: rgba(255,71,87,0.2); color: #ff4757; border: 1px solid rgba(255,71,87,0.4); }
+
+  /* Score Circle */
+  .score-circle {
+    width: 120px;
+    height: 120px;
+    position: relative;
+  }
+
+  .score-circle svg {
+    transform: rotate(-90deg);
+    width: 120px;
+    height: 120px;
+  }
+
+  .score-circle .track {
+    fill: none;
+    stroke: var(--border);
+    stroke-width: 8;
+  }
+
+  .score-circle .fill {
+    fill: none;
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    stroke-dasharray: 327;
+    stroke-dashoffset: 327;
+  }
+
+  .score-number {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+
+  .score-number span:first-child {
+    display: block;
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .score-number span:last-child {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+  }
+
+  /* Two column layout */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 600px) {
+    .two-col { grid-template-columns: 1fr; }
+    .score-hero { grid-template-columns: 1fr; }
+    .score-circle { margin: 0 auto; }
+  }
+
+  /* Section card */
+  .section-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  /* Parameter rows */
+  .param-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .param-row:last-child { margin-bottom: 0; }
+
+  .param-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .param-info { flex: 1; min-width: 0; }
+
+  .param-label {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .param-label span:last-child {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .param-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+
+  .param-bar-fill {
+    height: 100%;
+    border-radius: 100px;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0%;
+  }
+
+  .source-tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    flex-shrink: 0;
+  }
+
+  .source-live { background: rgba(0,255,135,0.12); color: var(--green-1); }
+  .source-mock { background: rgba(107,148,120,0.15); color: var(--muted); }
+  .source-derived { background: rgba(255,215,0,0.1); color: var(--gold); }
+
+  /* Satellite Section */
+  .satellite-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .satellite-header {
+    padding: 20px 24px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .satellite-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .satellite-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(0,255,135,0.08);
+    border: 1px solid rgba(0,255,135,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .satellite-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .satellite-subtitle {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .ndvi-badge {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 14px;
+    text-align: center;
+  }
+
+  .ndvi-label {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .ndvi-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .ndvi-desc {
+    font-size: 10px;
+    margin-top: 2px;
+  }
+
+  .satellite-image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    background: var(--surface);
+    overflow: hidden;
+  }
+
+  .satellite-image-wrapper iframe,
+  .satellite-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    border: none;
+    object-fit: cover;
+  }
+
+  .satellite-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 16px 20px;
+    background: linear-gradient(transparent, rgba(6,13,8,0.9));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .satellite-overlay-text {
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .sentinel-badge {
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+    color: var(--green-1);
+    background: rgba(0,255,135,0.1);
+    border: 1px solid rgba(0,255,135,0.2);
+    padding: 4px 10px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  /* NDVI Scale */
+  .ndvi-scale {
+    padding: 16px 24px 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .ndvi-scale-label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .ndvi-bar-container {
+    height: 8px;
+    border-radius: 100px;
+    background: linear-gradient(to right, #ff4757, #ff8c42, #ffd700, #52b788, #00ff87);
+    position: relative;
+    margin-bottom: 6px;
+  }
+
+  .ndvi-indicator {
+    position: absolute;
+    top: -4px;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 0 3px var(--bg);
+    transition: left 1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ndvi-scale-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 40px 0 20px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  footer span { color: var(--green-1); }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🌿</div>
+      <span class="logo-text">Green Habitat</span>
+    </div>
+    <h1>Environmental Livability Certification</h1>
+    <p class="tagline">Powered by Sentinel-2A/2B · WAQI · OpenStreetMap</p>
+  </header>
+
+  <div class="search-box">
+    <input type="text" id="locationInput" placeholder="Enter area name, city or pincode..." value="Sector 62 Noida" />
+    <button class="search-btn" onclick="rateArea()">🔍 Analyse</button>
+  </div>
+
+  <div class="error-box" id="errorBox"></div>
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Fetching satellite imagery and environmental data...</p>
+  </div>
+
+  <div class="results" id="results">
+
+    <!-- Score Hero -->
+    <div class="score-hero">
+      <div>
+        <div class="location-name" id="locationName">—</div>
+        <div class="coordinates" id="coordsText">—</div>
+        <div class="certification-badge" id="certBadge">—</div>
+      </div>
+      <div class="score-circle">
+        <svg viewBox="0 0 120 120">
+          <circle class="track" cx="60" cy="60" r="52"/>
+          <circle class="fill" id="scoreArc" cx="60" cy="60" r="52"/>
+        </svg>
+        <div class="score-number">
+          <span id="scoreNumber">0</span>
+          <span>PEACE</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Satellite + Parameters two column -->
+    <div class="two-col">
+
+      <!-- Parameters -->
+      <div class="section-card">
+        <div class="section-title">🔬 Parameters</div>
+
+        <div class="param-row">
+          <div class="param-icon">🌿</div>
+          <div class="param-info">
+            <div class="param-label"><span>Greenery</span><span id="v-greenery">—</span></div>
+            <div class="param-bar"><div class="param-bar-fill" id="b-greenery" style="background: linear-gradient(90deg, #00c96a, #00ff87)"></div></div>
+          </div>
+          <span class="source-tag" id="s-greenery">—</span>
+        </div>
+
+        <div class="param-row">
+          <div class="param-icon">💨</div>
+          <div class="param-info">
+            <div class="param-label"><span>Air Quality</span><span id="v-aqi">—</span></div>
+            <div class="param-bar"><div class="param-bar-fill" id="b-aqi" style="background: linear-gradient(90deg, #00a8e8, #00ff87)"></div></div>
+          </div>
+          <span class="source-tag" id="s-aqi">—</span>
+        </div>
+
+        <div class="param-row">
+          <div class="param-icon">🚗</div>
+          <div class="param-info">
+            <div class="param-label"><span>Traffic</span><span id="v-traffic">—</span></div>
+            <div class="param-bar"><div class="param-bar-fill" id="b-traffic" style="background: linear-gradient(90deg, #ff8c42, #ffd700)"></div></div>
+          </div>
+          <span class="source-tag" id="s-traffic">—</span>
+        </div>
+
+        <div class="param-row">
+          <div class="param-icon">👥</div>
+          <div class="param-info">
+            <div class="param-label"><span>Crowd Density</span><span id="v-crowd">—</span></div>
+            <div class="param-bar"><div class="param-bar-fill" id="b-crowd" style="background: linear-gradient(90deg, #a855f7, #00ff87)"></div></div>
+          </div>
+          <span class="source-tag" id="s-crowd">—</span>
+        </div>
+
+        <div class="param-row">
+          <div class="param-icon">🔇</div>
+          <div class="param-info">
+            <div class="param-label"><span>Noise Level</span><span id="v-noise">—</span></div>
+            <div class="param-bar"><div class="param-bar-fill" id="b-noise" style="background: linear-gradient(90deg, #ff4757, #ffd700)"></div></div>
+          </div>
+          <span class="source-tag source-derived">derived</span>
+        </div>
+      </div>
+
+      <!-- NDVI Info Card -->
+      <div class="section-card">
+        <div class="section-title">🛰️ Satellite Analysis</div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+          <div class="ndvi-badge">
+            <div class="ndvi-label">NDVI</div>
+            <div class="ndvi-value" id="ndviValue" style="color: var(--green-1)">—</div>
+            <div class="ndvi-desc" id="ndviDesc" style="color: var(--muted)">—</div>
+          </div>
+          <div class="ndvi-badge">
+            <div class="ndvi-label">Source</div>
+            <div style="font-family:'Syne',sans-serif; font-size:13px; font-weight:700; line-height:1.3; margin-top:4px" id="satSourceDisplay">—</div>
+          </div>
+        </div>
+
+        <div style="font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 16px;">
+          NDVI is computed from Sentinel-2 Bands<br>
+          <strong style="color:var(--text)">B8 (NIR, 842nm)</strong> and <strong style="color:var(--text)">B4 (Red, 665nm)</strong><br>
+          using formula: <strong style="color:var(--green-1)">(B8 − B4) / (B8 + B4)</strong>
+        </div>
+
+        <div style="font-size: 12px; color: var(--muted);">
+          <div style="margin-bottom:4px">🟢 &gt; 0.6 — Dense vegetation</div>
+          <div style="margin-bottom:4px">🟡 0.2 – 0.6 — Sparse / moderate</div>
+          <div>🔴 &lt; 0.2 — Urban / bare land</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Satellite Image Full Width -->
+    <div class="satellite-card">
+      <div class="satellite-header">
+        <div class="satellite-header-left">
+          <div class="satellite-icon">🛰️</div>
+          <div>
+            <div class="satellite-title">Sentinel-2A/2B Satellite View</div>
+            <div class="satellite-subtitle" id="satSubtitle">Copernicus Dataspace · ESA · 10 m/pixel</div>
+          </div>
+        </div>
+        <span class="sentinel-badge" id="sentinelBadge">SENTINEL-2</span>
+      </div>
+
+      <div class="satellite-image-wrapper" id="satelliteImageWrapper">
+        <div style="display:flex; align-items:center; justify-content:center; height:100%; color:var(--muted); font-style:italic; font-size:14px;">
+          Search a location to load satellite view
+        </div>
+      </div>
+
+      <div class="ndvi-scale">
+        <div class="ndvi-scale-label">NDVI Scale</div>
+        <div class="ndvi-bar-container">
+          <div class="ndvi-indicator" id="ndviIndicator" style="left: 50%"></div>
+        </div>
+        <div class="ndvi-scale-labels">
+          <span>0.0 Urban</span>
+          <span>0.2</span>
+          <span>0.4</span>
+          <span>0.6</span>
+          <span>0.8</span>
+          <span>1.0 Dense</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /results -->
+
+  <footer>
+    Built with 💚 for <span>AMD Slingshot Hackathon</span> · Green Habitat Certification API
+  </footer>
+
+</div>
+
+<script>
+  const API_BASE = 'http://127.0.0.1:8000';
+
+  async function rateArea() {
+    const location = document.getElementById('locationInput').value.trim();
+    if (!location) return;
+
+    // Show loading
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('errorBox').style.display = 'none';
+
+    try {
+      const res = await fetch(`${API_BASE}/rate-area?location=${encodeURIComponent(location)}`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.detail || 'Could not fetch data for this location.');
+      }
+
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('results').style.display = 'block';
+
+      renderResults(data);
+    } catch (err) {
+      document.getElementById('loading').style.display = 'none';
+      const box = document.getElementById('errorBox');
+      box.style.display = 'block';
+      box.textContent = '⚠️ ' + (err.message || 'Something went wrong. Make sure the API server is running.');
+    }
+  }
+
+  function renderResults(data) {
+    // Location & coords
+    document.getElementById('locationName').textContent = data.location;
+    document.getElementById('coordsText').textContent =
+      `${data.coordinates.lat.toFixed(4)}°N, ${data.coordinates.lon.toFixed(4)}°E`;
+
+    // Certification badge
+    const badge = document.getElementById('certBadge');
+    badge.textContent = data.certification;
+    badge.className = 'certification-badge';
+    const cert = data.certification.toLowerCase();
+    if (cert.includes('platinum')) badge.classList.add('badge-platinum');
+    else if (cert.includes('green')) badge.classList.add('badge-green');
+    else if (cert.includes('moderate')) badge.classList.add('badge-moderate');
+    else badge.classList.add('badge-urban');
+
+    // Score circle
+    const score = data.peace_score;
+    document.getElementById('scoreNumber').textContent = score.toFixed(1);
+    const arc = document.getElementById('scoreArc');
+    const circumference = 327;
+    const offset = circumference - (score / 100) * circumference;
+    let strokeColor = '#00ff87';
+    if (score >= 85) strokeColor = '#ffd700';
+    else if (score >= 70) strokeColor = '#00ff87';
+    else if (score >= 55) strokeColor = '#ff8c42';
+    else strokeColor = '#ff4757';
+    arc.style.stroke = strokeColor;
+    setTimeout(() => { arc.style.strokeDashoffset = offset; }, 100);
+
+    // Parameters
+    const p = data.parameters;
+    const s = data.data_sources || {};
+    setParam('greenery', p.greenery_score, s.greenery);
+    setParam('aqi', p.aqi_score, s.aqi);
+    setParam('traffic', p.traffic_score, s.traffic);
+    setParam('crowd', p.crowd_density_score, s.crowd_density);
+    setParam('noise', p.noise_score, 'derived');
+
+    // Satellite
+    renderSatellite(data);
+  }
+
+  function setParam(key, value, source) {
+    document.getElementById(`v-${key}`).textContent = value.toFixed(1);
+    setTimeout(() => {
+      document.getElementById(`b-${key}`).style.width = value + '%';
+    }, 200);
+    if (key !== 'noise') {
+      const tag = document.getElementById(`s-${key}`);
+      const isMock = !source || source === 'mock';
+      tag.textContent = isMock ? 'mock' : 'live';
+      tag.className = 'source-tag ' + (isMock ? 'source-mock' : 'source-live');
+    }
+  }
+
+  function renderSatellite(data) {
+    const wrapper = document.getElementById('satelliteImageWrapper');
+    const ndviVal = data.ndvi_value;
+    const satUrl = data.satellite_image_url;
+    const satSource = data.satellite_source || 'mock';
+
+    // NDVI display
+    if (ndviVal !== null && ndviVal !== undefined) {
+      document.getElementById('ndviValue').textContent = ndviVal.toFixed(2);
+      let ndviColor = '#ff4757';
+      let ndviDesc = 'Urban / bare land';
+      if (ndviVal > 0.6) { ndviColor = '#00ff87'; ndviDesc = 'Dense vegetation 🌿'; }
+      else if (ndviVal > 0.4) { ndviColor = '#52b788'; ndviDesc = 'Moderate green'; }
+      else if (ndviVal > 0.2) { ndviColor = '#ffd700'; ndviDesc = 'Sparse greenery'; }
+      document.getElementById('ndviValue').style.color = ndviColor;
+      document.getElementById('ndviDesc').textContent = ndviDesc;
+
+      // NDVI indicator position (0 to 1 maps to 0% to 100%)
+      const pct = Math.min(Math.max(ndviVal, 0), 1) * 100;
+      setTimeout(() => {
+        document.getElementById('ndviIndicator').style.left = pct + '%';
+      }, 300);
+    }
+
+    // Source display
+    let sourceLabel = 'Copernicus / ESA';
+    let badgeText = 'SENTINEL-2';
+    if (satSource.includes('google')) { sourceLabel = 'Google Maps Satellite'; badgeText = 'GOOGLE SAT'; }
+    else if (satSource === 'mock') { sourceLabel = 'OpenStreetMap (fallback)'; badgeText = 'OSM MAP'; }
+    else if (satSource.includes('sentinel')) {
+      const date = satSource.split('_').pop();
+      sourceLabel = `Sentinel-2 · ${date}`;
+    }
+    document.getElementById('satSourceDisplay').textContent = sourceLabel;
+    document.getElementById('sentinelBadge').textContent = badgeText;
+    document.getElementById('satSubtitle').textContent =
+      satSource === 'mock' ? 'OpenStreetMap fallback view' : 'Copernicus Dataspace · ESA · 10 m/pixel';
+
+    // Satellite image
+    if (satUrl) {
+      const isEmbed = satUrl.includes('openstreetmap.org/export/embed') || satUrl.includes('embed.html');
+      if (isEmbed) {
+        wrapper.innerHTML = `<iframe src="${satUrl}" title="Area satellite/map view" loading="lazy"></iframe>
+          <div class="satellite-overlay">
+            <span class="satellite-overlay-text">📍 ${document.getElementById('locationName').textContent}</span>
+            <span class="sentinel-badge">OSM MAP</span>
+          </div>`;
+      } else {
+        wrapper.innerHTML = `<img src="${satUrl}" alt="Satellite view" onerror="this.parentNode.innerHTML='<div style=padding:40px;text-align:center;color:var(--muted)>Satellite image unavailable</div>'"/>
+          <div class="satellite-overlay">
+            <span class="satellite-overlay-text">📍 ${document.getElementById('locationName').textContent}</span>
+            <span class="sentinel-badge">${badgeText}</span>
+          </div>`;
+      }
+    } else {
+      wrapper.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-style:italic;font-size:14px;">No satellite image available</div>`;
+    }
+  }
+
+  // Enter key support
+  document.getElementById('locationInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') rateArea();
+  });
+</script>
+
+</body>
+</html>
